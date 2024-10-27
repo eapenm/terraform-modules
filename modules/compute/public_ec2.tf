@@ -1,10 +1,11 @@
-resource "aws_instance" "public-server" {
+resource "aws_instance" "public-servers" {
   # count = length(var.public_cird_block)
   count                       = var.environment == "production" ? 3 : 1
   ami                         = lookup(var.amis, var.aws_region)
-  instance_type               = "t2.micro"
+  instance_type               = var.instance_type
   key_name                    = var.key_name
-  subnet_id                   = element(var.public_subnet, count.index + 1)
+  iam_instance_profile        = var.iam_instance_profile
+  subnet_id                   = element(var.public_subnets, count.index + 1)
   vpc_security_group_ids      = [var.sg_id]
   associate_public_ip_address = true
   tags = {
@@ -14,7 +15,7 @@ resource "aws_instance" "public-server" {
     TeamDL      = local.TeamDL
     environment = "${var.environment}"
   }
-  user_data = <<-EOF
+  user_data  = <<-EOF
      #!/bin/bash
      sudo apt update
      sudo apt install nginx -y
@@ -26,5 +27,5 @@ resource "aws_instance" "public-server" {
      sudo systemctl start nginx
      sudo systemctl enable nginx
  EOF
-
+  depends_on = [var.elb_listener_public]
 }

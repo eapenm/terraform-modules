@@ -1,8 +1,8 @@
-resource "aws_subnet" "public-subnet" {
+resource "aws_subnet" "public-subnets" {
   #count             = 3 #012
-  count             = length(var.public_cird_block)
+  count             = length(var.public_cidr_block)
   vpc_id            = aws_vpc.default.id
-  cidr_block        = element(var.public_cird_block, count.index + 1)
+  cidr_block        = element(var.public_cidr_block, count.index + 1)
   availability_zone = element(var.azs, count.index)
 
   tags = {
